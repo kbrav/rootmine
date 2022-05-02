@@ -166,6 +166,40 @@ describe('rootzone', ()=>{
         want(await rootzone.mark()).to.eql(commitment)
     })
 
+    it('RootCanal', async () => {
+        const rc_type = await ethers.getContractFactory('RootCanal', ali)
+        const rc = await rc_type.deploy(rootzone.address)
+        let crowns = []
+        for( let i = 0; i < 100; i++ ) {
+            const crown = {
+                salt: ethers.utils.hexZeroPad(i, 32),
+                name: ethers.utils.hexZeroPad(i, 32),
+                zone: ethers.utils.hexZeroPad(i, 20)
+            }
+            crowns.push(crown)
+        }
+        await hh.network.provider.send(
+            "hardhat_setCoinbase", [rc.address]
+        )
+
+        await send(rc.mold, crowns)
+        const commitment = getCommitment(b32('RootCanal'), zone1)
+        await wait(hh, delay_period)
+        await send(rootzone.hark, commitment, {value: ethers.utils.parseEther('1'), gasLimit: 30000000})
+
+        for( let i = 0; i < crowns.length; i++ ) {
+            const crown = crowns[i]
+            await check_entry(dmap, rootzone.address, crown.name, LOCK, padRight(crown.zone))
+        }
+
+        const prevBal = await ali.getBalance()
+        const rcBal = await rc.provider.getBalance(rc.address)
+        const rx = await send(rc.claim)
+        want(await ali.getBalance()).to.eql(
+            prevBal.sub(rx.gasUsed.mul(rx.effectiveGasPrice)).add(rcBal)
+        )
+    }).timeout(100000)
+
     describe('gas', () => {
         const commitment = getCommitment(b32('zone1'), zone1)
         it('hark', async () => {
