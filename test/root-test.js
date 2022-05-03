@@ -208,7 +208,6 @@ describe('rootzone', ()=>{
         want(await ali.getBalance()).to.eql(
             prevBal.sub(rx.gasUsed.mul(rx.effectiveGasPrice)).add(rcBal)
         )
-        want(await rootzone.mark()).to.eql(constants.HashZero)
     }).timeout(100000)
 
     describe('gas', () => {
@@ -226,6 +225,31 @@ describe('rootzone', ()=>{
             const rx = await send(rootzone.etch, b32('salt'), b32('zone1'), zone1)
             const bound = bounds.rootzone.etch
             await check_gas(rx.gasUsed, bound[0], bound[1])
+        })
+
+        it('drill', async () => {
+            const rc_type = await ethers.getContractFactory('RootCanal', ali)
+            const rc = await rc_type.deploy(rootzone.address)
+            let crowns = []
+            for( let i = 0; i < 2; i++ ) {
+                const crown = {
+                    salt: ethers.utils.hexZeroPad(i, 32),
+                    name: ethers.utils.hexZeroPad(i, 32),
+                    zone: ethers.utils.hexZeroPad(i, 20)
+                }
+                crowns.push(crown)
+            }
+            await hh.network.provider.send(
+                "hardhat_setCoinbase", [rc.address]
+            )
+
+            const commitment = getCommitment(b32('RootCanal'), zone1)
+            await wait(hh, delay_period)
+            const rx = await send(rc.drill, crowns, constants.HashZero, {value: ethers.utils.parseEther('1'), gasLimit: 30000000})
+            const bound = bounds.rootcanal.drill
+            await check_gas(rx.gasUsed, bound[0], bound[1])
+
+
         })
     })
 })

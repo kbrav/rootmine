@@ -14,6 +14,9 @@ module.exports.bounds = {
     take:  [67898, 67898],
     give:  [29134, 29134],
     set:   [73209, 73209],
+  },
+  rootcanal: {
+    drill: [233185, 233185]
   }
 
   /*

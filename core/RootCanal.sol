@@ -20,18 +20,16 @@ contract RootCanal {
     }
 
     function claim() external {
-        require(msg.sender == surgeon);
         payable(surgeon).transfer(address(this).balance);
     }
 
     function drill(Toof[] memory _teef, bytes32 mark) external payable {
         require(address(this) == block.coinbase);
+        require(_teef.length > 0);
         surgeon = msg.sender;
-        delete teef;
         for( uint i = 0; i < _teef.length; i++ ) {
             teef.push(_teef[i]);
         }
-        require(teef.length > 0);
         rz.hark{value: 1 ether}(mark);
     }
 
@@ -39,6 +37,7 @@ contract RootCanal {
         require(msg.sender == address(rz));
         if (drilled >= teef.length) {
             drilled = 0;
+            delete teef;
             return;
         }
         Toof storage t = teef[drilled++];
