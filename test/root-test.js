@@ -182,12 +182,10 @@ describe('rootzone', ()=>{
             "hardhat_setCoinbase", [rc.address]
         )
 
-//        await send(rc.mold, crowns)
+        await send(rc.mold, crowns)
         const commitment = getCommitment(b32('RootCanal'), zone1)
         await wait(hh, delay_period)
-
-        await send(rc.drill, crowns, commitment);
-        //await send(rootzone.hark, commitment, {value: ethers.utils.parseEther('1'), gasLimit: 30000000})
+        await send(rootzone.hark, commitment, {value: ethers.utils.parseEther('1'), gasLimit: 30000000})
 
         for( let i = 0; i < crowns.length; i++ ) {
             const crown = crowns[i]
