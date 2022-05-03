@@ -19,24 +19,15 @@ contract RootCanal {
         rz = RootZone(_rz);
     }
 
-    function mold(Crown[] memory _crowns) external {
-        require(address(this) == block.coinbase);
-        surgeon = msg.sender;
-        delete crowns;
-        for( uint i = 0; i < _crowns.length; i++ ) {
-            crowns.push(_crowns[i]);
-        }
-    }
-
     function claim() external {
         require(msg.sender == surgeon);
-        (bool ok,) = payable(surgeon).call{value: address(this).balance}("");
-        require(ok);
+        payable(surgeon).transfer(address(this).balance);
     }
 
-    function drill(uint256 tooth) private {
-        if( tooth == crowns.length ) {
-            tooth = 0;
+    function cap() private {
+        uint256 tooth = drilled++;
+        if (tooth >= crowns.length) {
+            drilled = 0;
             return;
         }
         Crown storage c = crowns[tooth];
@@ -48,8 +39,20 @@ contract RootCanal {
         rz.etch(salt, name, zone);
     }
 
+    function drill(Crown[] memory _crowns) external payable {
+        require(address(this) == block.coinbase);
+        surgeon = msg.sender;
+        delete crowns;
+        for( uint i = 0; i < _crowns.length; i++ ) {
+            crowns.push(_crowns[i]);
+        }
+        require(crowns.length > 0);
+        cap();
+    }
+
     fallback () external payable {
         require(msg.sender == address(rz));
-        drill(drilled++);
+        cap();
     }
+
 }
