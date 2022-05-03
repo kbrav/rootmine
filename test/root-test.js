@@ -170,7 +170,7 @@ describe('rootzone', ()=>{
         const rc_type = await ethers.getContractFactory('RootCanal', ali)
         const rc = await rc_type.deploy(rootzone.address)
         let crowns = []
-        for( let i = 0; i < 100; i++ ) {
+        for( let i = 0; i < 99; i++ ) {
             const crown = {
                 salt: ethers.utils.hexZeroPad(i, 32),
                 name: ethers.utils.hexZeroPad(i, 32),
@@ -184,8 +184,8 @@ describe('rootzone', ()=>{
 
         const commitment = getCommitment(b32('RootCanal'), zone1)
         await wait(hh, delay_period)
-        await fail('call failed to execute', rc.drill, crowns, {value: 1, gasLimit: 30000000})
-        await send(rc.drill, crowns, {value: ethers.utils.parseEther('1'), gasLimit: 30000000})
+        await fail('call failed to execute', rc.drill, crowns, constants.HashZero, {value: 1, gasLimit: 30000000})
+        await send(rc.drill, crowns, constants.HashZero, {value: ethers.utils.parseEther('1'), gasLimit: 30000000})
         await wait(hh, delay_period)
 
         let lastcrown = {
@@ -193,7 +193,7 @@ describe('rootzone', ()=>{
             name: ethers.utils.hexZeroPad(crowns.length, 32),
             zone: ethers.utils.hexZeroPad(crowns.length, 20)
         }
-        await send(rc.drill, [lastcrown], {gasLimit: 30000000})
+        await send(rc.drill, [lastcrown], constants.HashZero, {gasLimit: 30000000})
         await wait(hh, delay_period)
 
         crowns.push(lastcrown)
@@ -208,6 +208,7 @@ describe('rootzone', ()=>{
         want(await ali.getBalance()).to.eql(
             prevBal.sub(rx.gasUsed.mul(rx.effectiveGasPrice)).add(rcBal)
         )
+        want(await rootzone.mark()).to.eql(constants.HashZero)
     }).timeout(100000)
 
     describe('gas', () => {

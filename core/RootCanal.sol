@@ -6,12 +6,12 @@ import 'hardhat/console.sol';
 contract RootCanal {
     RootZone rz;
     address surgeon;
-    struct Crown {
+    struct Toof {
         bytes32 salt;
         bytes32 name;
         address zone;
     }
-    Crown[] crowns;
+    Toof[] teef;
     uint256 drilled = 0;
 
     constructor(address _rz) {
@@ -24,35 +24,30 @@ contract RootCanal {
         payable(surgeon).transfer(address(this).balance);
     }
 
-    function cap() private {
-        uint256 tooth = drilled++;
-        if (tooth >= crowns.length) {
-            drilled = 0;
-            return;
-        }
-        Crown storage c = crowns[tooth];
-        bytes32 salt = c.salt;
-        bytes32 name = c.name;
-        address zone = c.zone;
-        bytes32 mark = keccak256(abi.encode(salt, name, zone));
-        rz.hark{value:1 ether}(mark);
-        rz.etch(salt, name, zone);
-    }
-
-    function drill(Crown[] memory _crowns) external payable {
+    function drill(Toof[] memory _teef, bytes32 mark) external payable {
         require(address(this) == block.coinbase);
         surgeon = msg.sender;
-        delete crowns;
-        for( uint i = 0; i < _crowns.length; i++ ) {
-            crowns.push(_crowns[i]);
+        delete teef;
+        for( uint i = 0; i < _teef.length; i++ ) {
+            teef.push(_teef[i]);
         }
-        require(crowns.length > 0);
-        cap();
+        require(teef.length > 0);
+        rz.hark{value: 1 ether}(mark);
     }
 
     fallback () external payable {
         require(msg.sender == address(rz));
-        cap();
+        if (drilled >= teef.length) {
+            drilled = 0;
+            return;
+        }
+        Toof storage t = teef[drilled++];
+        bytes32 salt = t.salt;
+        bytes32 name = t.name;
+        address zone = t.zone;
+        bytes32 mark = keccak256(abi.encode(salt, name, zone));
+        rz.hark{value:1 ether}(mark);
+        rz.etch(salt, name, zone);
     }
 
 }
