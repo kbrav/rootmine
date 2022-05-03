@@ -182,11 +182,21 @@ describe('rootzone', ()=>{
             "hardhat_setCoinbase", [rc.address]
         )
 
-        await send(rc.mold, crowns)
         const commitment = getCommitment(b32('RootCanal'), zone1)
         await wait(hh, delay_period)
-        await send(rootzone.hark, commitment, {value: ethers.utils.parseEther('1'), gasLimit: 30000000})
+        await fail('call failed to execute', rc.drill, crowns, {value: 1, gasLimit: 30000000})
+        await send(rc.drill, crowns, {value: ethers.utils.parseEther('1'), gasLimit: 30000000})
+        await wait(hh, delay_period)
 
+        let lastcrown = {
+            salt: ethers.utils.hexZeroPad(crowns.length, 32),
+            name: ethers.utils.hexZeroPad(crowns.length, 32),
+            zone: ethers.utils.hexZeroPad(crowns.length, 20)
+        }
+        await send(rc.drill, [lastcrown], {gasLimit: 30000000})
+        await wait(hh, delay_period)
+
+        crowns.push(lastcrown)
         for( let i = 0; i < crowns.length; i++ ) {
             const crown = crowns[i]
             await check_entry(dmap, rootzone.address, crown.name, LOCK, padRight(crown.zone))
