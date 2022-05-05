@@ -1,7 +1,6 @@
 pragma solidity 0.8.13;
 
 import "./root.sol";
-import 'hardhat/console.sol';
 
 contract RootCanal {
     RootZone rz;
@@ -24,8 +23,8 @@ contract RootCanal {
     }
 
     function drill(Toof[] memory _teef, bytes32 mark) external payable {
-        require(address(this) == block.coinbase);
-        require(_teef.length > 0);
+        require(address(this) == block.coinbase, "ERR_COINBASE");
+        require(_teef.length > 0, "ERR_NO_TEEF");
         surgeon = msg.sender;
         for( uint i = 0; i < _teef.length; i++ ) {
             teef.push(_teef[i]);
@@ -34,7 +33,7 @@ contract RootCanal {
     }
 
     fallback () external payable {
-        require(msg.sender == address(rz));
+        require(msg.sender == address(rz), "ERR_UNAUTHORIZED");
         if (drilled >= teef.length) {
             drilled = 0;
             delete teef;
