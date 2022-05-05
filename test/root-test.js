@@ -28,7 +28,7 @@ describe('rootzone', ()=>{
         return hh.ethers.utils.keccak256(encoded)
     }
 
-    let rc_type, rc
+    let rm_type, rm
 
     before(async ()=>{
         [ali, bob, cat] = await ethers.getSigners();
@@ -39,8 +39,8 @@ describe('rootzone', ()=>{
         dmap = dapp.dmap
         rootzone = dapp.rootzone
         freezone = dapp.freezone
-        rc_type = await ethers.getContractFactory('RootCanal', ali)
-        rc = await rc_type.deploy(rootzone.address)
+        rm_type = await ethers.getContractFactory('RootMine', ali)
+        rm = await rm_type.deploy(rootzone.address)
         await snapshot(hh)
     })
 
@@ -170,43 +170,43 @@ describe('rootzone', ()=>{
         want(await rootzone.mark()).to.eql(commitment)
     })
 
-    const fillteef = (m, n) => {
-        let teef = []
+    const fillores = (m, n) => {
+        let ores = []
         for (let i = m; i < n; i++) {
-            const toof = {
+            const ore = {
                 salt: ethers.utils.hexZeroPad(i, 32),
                 name: ethers.utils.hexZeroPad(i, 32),
                 zone: ethers.utils.hexZeroPad(i, 20)
             }
-            teef.push(toof)
+            ores.push(ore)
         }
-        return teef
+        return ores
     }
 
-    describe('RootCanal', () => {
-        const teef04 = fillteef(0, 4)
+    describe('RootMine', () => {
+        const ores04 = fillores(0, 4)
 
         beforeEach(async () => {
-            await hh.network.provider.send("hardhat_setCoinbase", [rc.address])
+            await hh.network.provider.send("hardhat_setCoinbase", [rm.address])
         })
 
         it('claim between', async () => {
             await wait(hh, delay_period)
             await send(
-                rc.drill, teef04, constants.HashZero,
+                rm.drill, ores04, constants.HashZero,
                 {value: ethers.utils.parseEther('1'), gasLimit: 30000000}
             )
-            await send(rc.claim)
+            await send(rm.claim)
             await wait(hh, delay_period)
             // use block subsidy
-            await send(rc.drill, fillteef(4, 8), constants.HashZero, {gasLimit: 30000000})
+            await send(rm.drill, fillores(4, 8), constants.HashZero, {gasLimit: 30000000})
         })
 
         it('insufficient funds', async () => {
             await wait(hh, delay_period)
-            await fail('failed to execute', rc.drill, teef04, constants.HashZero, {gasLimit: 30000000})
+            await fail('failed to execute', rm.drill, ores04, constants.HashZero, {gasLimit: 30000000})
             await send(
-                rc.drill, teef04, constants.HashZero,
+                rm.drill, ores04, constants.HashZero,
                 {value: ethers.utils.parseEther('1'), gasLimit: 30000000}
             )
         })
@@ -214,59 +214,59 @@ describe('rootzone', ()=>{
         it('redrill', async () => {
             await wait(hh, delay_period)
             await send(
-                rc.drill, teef04, constants.HashZero,
+                rm.drill, ores04, constants.HashZero,
                 {value: ethers.utils.parseEther('1'), gasLimit: 30000000}
             )
             await wait(hh, delay_period)
             // use block subsidy
-            await fail('ErrReceipt()', rc.drill, teef04, constants.HashZero, {gasLimit: 30000000})
+            await fail('ErrReceipt()', rm.drill, ores04, constants.HashZero, {gasLimit: 30000000})
         })
 
         it('not coinbase', async () => {
             await hh.network.provider.send("hardhat_setCoinbase", [ALI])
             await wait(hh, delay_period)
             await fail(
-                'ERR_COINBASE', rc.drill, fillteef(0, 4), constants.HashZero,
+                'ERR_COINBASE', rm.drill, fillores(0, 4), constants.HashZero,
                 {value: ethers.utils.parseEther('1'), gasLimit: 30000000}
             )
         })
 
         it('unauthorized', async () => {
             await hh.network.provider.send("hardhat_setCoinbase", [ALI])
-            await want(ali.sendTransaction({to: rc.address}))
+            await want(ali.sendTransaction({to: rm.address}))
                 .rejectedWith('ERR_UNAUTHORIZED')
-            await hh.network.provider.send("hardhat_setCoinbase", [rc.address])
-            await want(ali.sendTransaction({to: rc.address}))
+            await hh.network.provider.send("hardhat_setCoinbase", [rm.address])
+            await want(ali.sendTransaction({to: rm.address}))
                 .rejectedWith('ERR_UNAUTHORIZED')
         })
 
         it('big', async () => {
-            let teef = fillteef(0, 99)
+            let ores = fillores(0, 99)
 
             await wait(hh, delay_period)
-            await fail('call failed to execute', rc.drill, teef, constants.HashZero, {value: 1, gasLimit: 30000000})
-            await send(rc.drill, teef, constants.HashZero, {value: ethers.utils.parseEther('1'), gasLimit: 30000000})
+            await fail('call failed to execute', rm.drill, ores, constants.HashZero, {value: 1, gasLimit: 30000000})
+            await send(rm.drill, ores, constants.HashZero, {value: ethers.utils.parseEther('1'), gasLimit: 30000000})
             await wait(hh, delay_period)
 
-            const lasttoof = {
-                salt: ethers.utils.hexZeroPad(teef.length, 32),
-                name: ethers.utils.hexZeroPad(teef.length, 32),
-                zone: ethers.utils.hexZeroPad(teef.length, 20)
+            const lastore = {
+                salt: ethers.utils.hexZeroPad(ores.length, 32),
+                name: ethers.utils.hexZeroPad(ores.length, 32),
+                zone: ethers.utils.hexZeroPad(ores.length, 20)
             }
-            await send(rc.drill, [lasttoof], constants.HashZero, {gasLimit: 30000000})
+            await send(rm.drill, [lastore], constants.HashZero, {gasLimit: 30000000})
             await wait(hh, delay_period)
 
-            teef.push(lasttoof)
-            for (let i = 0; i < teef.length; i++) {
-                const toof = teef[i]
-                await check_entry(dmap, rootzone.address, toof.name, LOCK, padRight(toof.zone))
+            ores.push(lastore)
+            for (let i = 0; i < ores.length; i++) {
+                const ore = ores[i]
+                await check_entry(dmap, rootzone.address, ore.name, LOCK, padRight(ore.zone))
             }
 
             const prevBal = await ali.getBalance()
-            const rcBal = await rc.provider.getBalance(rc.address)
-            const rx = await send(rc.claim)
+            const rmBal = await rm.provider.getBalance(rm.address)
+            const rx = await send(rm.claim)
             want(await ali.getBalance()).to.eql(
-                prevBal.sub(rx.gasUsed.mul(rx.effectiveGasPrice)).add(rcBal)
+                prevBal.sub(rx.gasUsed.mul(rx.effectiveGasPrice)).add(rmBal)
             )
         }).timeout(100000)
     })
@@ -289,12 +289,12 @@ describe('rootzone', ()=>{
         })
 
         it('drill', async () => {
-            const teef = fillteef(0, 2)
-            await hh.network.provider.send("hardhat_setCoinbase", [rc.address])
+            const ores = fillores(0, 2)
+            await hh.network.provider.send("hardhat_setCoinbase", [rm.address])
 
-            const commitment = getCommitment(b32('RootCanal'), zone1)
+            const commitment = getCommitment(b32('RootMine'), zone1)
             await wait(hh, delay_period)
-            const rx = await send(rc.drill, teef, constants.HashZero, {value: ethers.utils.parseEther('1'), gasLimit: 30000000})
+            const rx = await send(rm.drill, ores, constants.HashZero, {value: ethers.utils.parseEther('1'), gasLimit: 30000000})
             const bound = bounds.rootcanal.drill
             await check_gas(rx.gasUsed, bound[0], bound[1])
 

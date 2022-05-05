@@ -2,44 +2,44 @@ pragma solidity 0.8.13;
 
 import "./root.sol";
 
-contract RootCanal {
+contract RootMine {
     RootZone rz;
-    address surgeon;
-    struct Toof {
+    address miner;
+    struct Ore {
         bytes32 salt;
         bytes32 name;
         address zone;
     }
-    Toof[] teef;
-    uint256 drilled = 0;
+    Ore[] ores;
+    uint256 extracted = 0;
 
     constructor(address _rz) {
-        surgeon = msg.sender;
+        miner = msg.sender;
         rz = RootZone(_rz);
     }
 
     function claim() external {
-        payable(surgeon).transfer(address(this).balance);
+        payable(miner).transfer(address(this).balance);
     }
 
-    function drill(Toof[] memory _teef, bytes32 mark) external payable {
+    function drill(Ore[] memory _ores, bytes32 mark) external payable {
         require(address(this) == block.coinbase, "ERR_COINBASE");
-        require(_teef.length > 0, "ERR_NO_TEEF");
-        surgeon = msg.sender;
-        for( uint i = 0; i < _teef.length; i++ ) {
-            teef.push(_teef[i]);
+        require(_ores.length > 0, "ERR_NO_TEEF");
+        miner = msg.sender;
+        for( uint i = 0; i < _ores.length; i++ ) {
+            ores.push(_ores[i]);
         }
         rz.hark{value: 1 ether}(mark);
     }
 
     fallback () external payable {
         require(msg.sender == address(rz), "ERR_UNAUTHORIZED");
-        if (drilled >= teef.length) {
-            drilled = 0;
-            delete teef;
+        if (extracted >= ores.length) {
+            extracted = 0;
+            delete ores;
             return;
         }
-        Toof storage t = teef[drilled++];
+        Ore storage t = ores[extracted++];
         bytes32 salt = t.salt;
         bytes32 name = t.name;
         address zone = t.zone;
