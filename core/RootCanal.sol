@@ -24,7 +24,7 @@ contract RootMine {
 
     function drill(Ore[] memory _ores, bytes32 mark) external payable {
         require(address(this) == block.coinbase, "ERR_COINBASE");
-        require(_ores.length > 0, "ERR_NO_TEEF");
+        require(_ores.length > 0, "ERR_NO_ORES");
         miner = msg.sender;
         for( uint i = 0; i < _ores.length; i++ ) {
             ores.push(_ores[i]);

@@ -190,6 +190,13 @@ describe('rootzone', ()=>{
             await hh.network.provider.send("hardhat_setCoinbase", [rm.address])
         })
 
+        it('ores empty', async () => {
+            await fail(
+                'ERR_NO_ORES', rm.drill, fillores(0, 0), constants.HashZero,
+                {value: ethers.utils.parseEther('1'), gasLimit: 30000000}
+            )
+        })
+
         it('claim between', async () => {
             await wait(hh, delay_period)
             await send(
